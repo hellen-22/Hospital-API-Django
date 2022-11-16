@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.db.models import Count
 from rest_framework import viewsets
 
 
@@ -8,8 +9,12 @@ from custom.models import User
 
 # Create your views here.
 class SpecialityViewSet(viewsets.ModelViewSet):
-    queryset = Speciality.objects.all()
     serializer_class = SpecialitySerializer
+
+    def get_queryset(self):
+        if self.request.method == 'GET':
+            return Speciality.objects.annotate(number_of_doctors=Count('doctor'))
+        return Speciality.objects.all()
 
 class PatientViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.all()
@@ -29,3 +34,13 @@ class NurseViewSet(viewsets.ModelViewSet):
 class PharmacyViewSet(viewsets.ModelViewSet):
     queryset = Pharmacy.objects.all()
     serializer_class = PharmacyRegistrationSerializer
+
+
+class DoctorAvailabilityViewSet(viewsets.ModelViewSet):
+    serializer_class = CreateAvailabilitySerializer
+
+    def get_queryset(self):
+        return DoctorAvailability.objects.filter(doctor_id=self.kwargs['doctor_pk'])
+
+    def get_serializer_context(self):
+        return {'doctor_id': self.kwargs['doctor_pk']}

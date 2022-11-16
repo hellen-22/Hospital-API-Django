@@ -9,6 +9,9 @@ router.register('doctor', views.DoctorViewSet, basename='doctor')
 router.register('nurse', views.NurseViewSet, basename='nurse')
 router.register('pharmacy', views.PharmacyViewSet, basename='pharmacy')
 
+doctors_routers = routers.NestedDefaultRouter(router, 'doctor', lookup='doctor')
+doctors_routers.register('availability', views.DoctorAvailabilityViewSet, basename='availability')
 
 
-urlpatterns = router.urls
+
+urlpatterns = router.urls + doctors_routers.urls

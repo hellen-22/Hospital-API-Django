@@ -6,11 +6,19 @@ from custom.models import User
 from .models import *
 
 
+class DoctorDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Doctor
+        fields = ['user', 'location']
+
 
 class SpecialitySerializer(serializers.ModelSerializer):
+    number_of_doctors = serializers.IntegerField(read_only=True)
+    doctor = DoctorDetailSerializer(many=True, read_only=True)
+
     class Meta:
         model = Speciality
-        fields = ['id', 'name', 'description']
+        fields = ['id', 'name', 'description', 'number_of_doctors', 'doctor']
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
@@ -45,12 +53,18 @@ class PatientRegistrationSerializer(serializers.ModelSerializer):
             else:
                 raise serializers.ValidationError('Passwords do not match')
 
+class AvailabilityDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DoctorAvailability
+        fields = ['date', 'time']
+
 class DoctorRegistrationSerializer(serializers.ModelSerializer):
     user = UserDetailSerializer()
-
+    availability = AvailabilityDetailsSerializer(many=True, read_only=True)
+    
     class Meta:
         model = Doctor
-        fields = ['id', 'user', 'location', 'speciality']
+        fields = ['id', 'user', 'location', 'speciality', 'availability']
     
     
     def save(self, **kwargs):
@@ -151,4 +165,19 @@ class LabRegistrationSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('Passwords do not match')
 
 
+
+class CreateAvailabilitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DoctorAvailability
+        fields = ['date', 'time']
+
+
+    def save(self, **kwargs):
+        doctor_id = self.context['doctor_id']
+        date = self.validated_data['date']
+        time = self.validated_data['time']
+
+        availability = DoctorAvailability.objects.create(doctor_id=doctor_id, date=date, time=time)
+
+        return availability
 
