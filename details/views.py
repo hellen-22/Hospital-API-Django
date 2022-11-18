@@ -44,3 +44,8 @@ class DoctorAvailabilityViewSet(viewsets.ModelViewSet):
 
     def get_serializer_context(self):
         return {'doctor_id': self.kwargs['doctor_pk']}
+
+
+class LoginViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = LoginSerializer

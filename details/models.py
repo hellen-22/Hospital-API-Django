@@ -25,6 +25,10 @@ class Doctor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     location = models.CharField(max_length=100)
     speciality = models.ForeignKey(Speciality, on_delete=models.CASCADE, related_name='doctor')
+    charge = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    bio = models.TextField(null=True)
+    certificate = models.FileField(null=True)
+    profile_image = models.ImageField(null=True)
 
     def __str__(self) -> str:
         return self.user.username
@@ -60,13 +64,11 @@ class DoctorAvailability(models.Model):
         return self.doctor.user.username
 
 class PatientConsultation(models.Model):
-    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
+    availability = models.ForeignKey(DoctorAvailability, on_delete=models.CASCADE)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    date = models.DateField()
-    time = models.TimeField(default=None)
     duration = models.CharField(max_length=255, default=None)
     status = models.CharField(max_length=255, choices=STATUS_CHOICES)
-    charge = models.DecimalField(max_digits=10, decimal_places=2, default=None)
+    
 
     def __str__(self) -> str:
         return f'{self.patient.user.username} Consulting for {self.doctor.speciality}'

@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate
 from django.db import transaction
 from rest_framework import serializers
 
@@ -61,7 +62,7 @@ class AvailabilityDetailsSerializer(serializers.ModelSerializer):
 class DoctorRegistrationSerializer(serializers.ModelSerializer):
     user = UserDetailSerializer()
     availability = AvailabilityDetailsSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = Doctor
         fields = ['id', 'user', 'location', 'speciality', 'availability']
@@ -181,3 +182,22 @@ class CreateAvailabilitySerializer(serializers.ModelSerializer):
 
         return availability
 
+
+class LoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email', 'password']
+
+    def validate(self, data):
+        user = authenticate(**data)
+        
+        if user and user.is_active:
+            return user
+        
+        raise serializers.ValidationError('Incorrect credentials')
+
+
+class PatientConsultation(serializers.ModelSerializer):
+    class Meta:
+        model = PatientConsultation
+        fields = ['doctor']
